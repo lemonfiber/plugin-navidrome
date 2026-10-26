@@ -8,7 +8,8 @@ hooks:
     @echo "hooks on: .githooks/commit-msg, .githooks/pre-push"
 
 # The gates that need nothing but this tree, in CI's order. The plugin verdict
-# (spec's first-party-plugin workflow) and the adapter's image run in CI.
+# (spec's first-party-plugin workflow) and the conformance recordings, which
+# need Docker, run in CI; `just recordings` is the second of them.
 ci: hooks fmt clippy test coverage deny typos links
 
 # The adapter's format.
@@ -30,6 +31,13 @@ coverage:
 # The adapter's dependencies, held to `deny.toml`.
 deny:
     cargo deny --log-level warn check
+
+# Every recording, taken again with the adapter built from this tree and compared.
+# Needs Docker, and `lemonfiber` at the commit `targets.toml` names on the path.
+recordings:
+    docker build -q -t plugin-navidrome:pr .
+    python3 -c 'import tomllib; print("\n".join(s["image"] + "@" + s["digest"] for s in tomllib.load(open("plugin.toml", "rb"))["service"] if "fronts" not in s))' | xargs -n1 docker pull -q
+    lemonfiber plugin record . --check --adapter plugin-navidrome:pr
 
 # Spell check.
 typos:

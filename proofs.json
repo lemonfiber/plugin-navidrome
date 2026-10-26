@@ -1,16 +1,10 @@
 {
-  "lemonfiber": "c76afcb4d84f093cbb28cde90b9f2231ffcde0cd",
+  "lemonfiber": "2f96e225110a684fbd34e62ae818721f2998860c",
   "against": "recordings",
   "proofs": [
     {
-      "id": "media.serve/guarded",
-      "kind": "probe",
-      "outcome": "passed",
-      "detail": ""
-    },
-    {
-      "id": "media.serve/catalogue",
-      "kind": "probe",
+      "id": "navidrome.guarded",
+      "kind": "proof",
       "outcome": "passed",
       "detail": ""
     }
