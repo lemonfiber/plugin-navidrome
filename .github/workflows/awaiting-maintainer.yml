@@ -4,7 +4,7 @@
 #
 #   gates     gates / gates
 #   pin-only  pin-only / pin-only
-#   plugin    plugin / what changed, plugin / plugin
+#   plugin    plugin / what changed, plugin / plugin, recordings
 #   rust      fmt, clippy, test, coverage, deny, msrv
 #   adapter   adapter-image
 #   codeql    analyze (actions), analyze (rust), alerts / alerts

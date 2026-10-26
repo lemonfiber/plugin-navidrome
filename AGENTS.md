@@ -17,13 +17,15 @@ the core at the commit `Cargo.toml` pins, into the image the `Dockerfile` builds
 train's tag. The
 [bundle contract](https://github.com/lemonfiber/spec/blob/main/20-architecture/contracts/bundle.md)
 says how the catalogue pins this repository and how lemonfiber carries it.
-`plugin.toml` does not name the adapter yet: the part is one service.
+`plugin.toml` runs Navidrome beside the adapter, `navidrome-adapter`, which
+`fronts` it, and the conformance recordings under `conformance/` are the
+adapter's answers.
 
 ## The rules you cannot break
 
 - **The plugin id is the service's id** (`ARCH-R266`). The container, the
   configuration directory, the settings and the journal keep their names.
-- **Its claims' recordings sit under `recordings/navidrome/`**, and its starting
+- **Its proofs' recordings sit under `recordings/navidrome/`**, and its starting
   files, where it has any, under `config/navidrome/` (`ARCH-R271`).
 - **Every service declares `reaches` and `asks_for`** (`ARCH-R270`).
 - **No Python here.** The reader is spec's `first-party-plugin` workflow's.
@@ -51,5 +53,6 @@ says how the catalogue pins this repository and how lemonfiber carries it.
 just ci
 ```
 
-The gates that need nothing but this tree. The plugin verdict and the adapter's
-image run in CI.
+The gates that need nothing but this tree. The plugin verdict and the
+recordings run in CI; `just recordings` takes the recordings again locally, with
+Docker.
