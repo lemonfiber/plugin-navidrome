@@ -9,7 +9,7 @@ use super::{asked, navidrome, refused_saying, signed_in_and, url_of, SIGNED_IN, 
 
 const ALBUM: &str = "7orvCZZyWRqsduCdqXoguY";
 
-const PICTURED: &str = r#"{"id":"7orvCZZyWRqsduCdqXoguY","name":"Test Album","maxYear":2021,"date":"2021-05-03","comment":"An album of one tone","duration":3060.0,"songCount":1,"imageHash":"ba31f53919406251","genres":[{"id":"g","name":"Ambient"}]}"#;
+const PICTURED: &str = r#"{"id":"7orvCZZyWRqsduCdqXoguY","name":"Test Album","maxYear":2021,"date":"2021-05-03","comment":"An album of one tone","duration":3060.0,"songCount":1,"imageHash":"3141592653589793","genres":[{"id":"g","name":"Ambient"}]}"#;
 
 const BARE: &str = r#"{"id":"5Bg17dfmhe0faF2LB0cotF","name":"Bare Album","maxYear":0,"date":"2021","comment":" ","songCount":0}"#;
 
