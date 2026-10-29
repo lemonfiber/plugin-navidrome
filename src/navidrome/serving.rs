@@ -3,7 +3,8 @@
 use async_trait::async_trait;
 use lemonfiber_ports::media::Kind;
 use lemonfiber_ports::service::{
-    AppKeys, Dated, Declared, Declaring, Failure, Fronted, Library, SeriesHeld, Upkeep,
+    AppKeys, Applied, Dated, Declared, Declaring, Encrypting, Failure, Fronted, Library,
+    SeriesHeld, Upkeep,
 };
 
 use super::Navidrome;
@@ -21,6 +22,8 @@ const NO_ORIGINS: &str = "Navidrome holds no list of origins a browser may read 
 const NO_RESTART: &str = "Navidrome cannot be asked to start again";
 
 const NO_GUARD: &str = "Navidrome serves no member through a guard of lemonfiber's";
+
+const NO_TLS: &str = "Navidrome serves no internal TLS port";
 
 const SCAN: &str = "startScan";
 
@@ -102,5 +105,12 @@ impl Fronted for Navidrome {
 impl Declaring for Navidrome {
     async fn declared(&self) -> Result<Declared, Failure> {
         Err(Self::unsupported(NO_GUARD))
+    }
+}
+
+#[async_trait]
+impl Encrypting for Navidrome {
+    async fn serve_tls(&self, _path: &str, _pin: &str) -> Result<Applied, Failure> {
+        Err(Self::unsupported(NO_TLS))
     }
 }
