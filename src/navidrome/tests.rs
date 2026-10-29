@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
-use lemonfiber_ports::service::{Failure, Library as _, Owner, Ownership as _};
+use lemonfiber_ports::service::{Encrypting as _, Failure, Library as _, Owner, Ownership as _};
 
 use super::owning::first_time;
 use super::{an_id, Navidrome};
@@ -458,4 +458,14 @@ async fn a_claim_refused_while_nobody_holds_it_is_a_refusal() {
         (Method::Post, "/auth/createAdmin", Answer::reply(500, "")),
     ]);
     assert!(refused_saying(navidrome(&fake).claim().await, "HTTP 500"));
+}
+
+#[tokio::test]
+async fn it_serves_no_internal_tls_port_and_asks_nothing() {
+    let fake = Fake::silent();
+    let outcome = navidrome(&fake)
+        .serve_tls("/config/internal.p12", "pin")
+        .await;
+    assert!(matches!(outcome, Err(Failure::Unsupported { .. })));
+    assert!(fake.requests().is_empty());
 }
