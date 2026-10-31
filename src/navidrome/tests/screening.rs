@@ -134,7 +134,7 @@ async fn a_poster_is_the_album_s_cover_signed_as_subsonic_asks() {
         (
             Method::Get,
             "/rest/getCoverArt",
-            Answer::served(200, "image/jpeg", "jpeg-bytes"),
+            Answer::served(200, "image/gif", "GIF89a-bytes"),
         ),
     ]);
     assert_eq!(
@@ -144,8 +144,8 @@ async fn a_poster_is_the_album_s_cover_signed_as_subsonic_asks() {
             .ok()
             .flatten(),
         Some(Image {
-            media_type: "image/jpeg".to_owned(),
-            bytes: b"jpeg-bytes".to_vec(),
+            media_type: "image/gif".to_owned(),
+            bytes: b"GIF89a-bytes".to_vec(),
         })
     );
     assert_eq!(
@@ -174,6 +174,12 @@ async fn a_cover_navidrome_has_not_got_or_serves_as_no_picture_is_none() {
     for cover in [
         Answer::reply(200, ARTWORK_ABSENT),
         Answer::served(200, "text/plain", "nothing"),
+        Answer::served(
+            200,
+            "image/svg+xml",
+            r#"<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>"#,
+        ),
+        Answer::served(200, "image/png", "<html><script>alert(1)</script></html>"),
     ] {
         let fake = signed_in_and(vec![
             (Method::Get, "/api/album/", Answer::reply(200, PICTURED)),
@@ -207,7 +213,7 @@ async fn a_cover_refused_for_its_password_is_asked_for_again_once_signed_in_afre
             "/rest/getCoverArt",
             vec![
                 Answer::reply(200, WRONG_PASSWORD),
-                Answer::served(200, "image/png", "png-bytes"),
+                Answer::served(200, "image/webp", "RIFF0000WEBPVP8 "),
             ],
         ),
     ]);
@@ -218,7 +224,7 @@ async fn a_cover_refused_for_its_password_is_asked_for_again_once_signed_in_afre
         .flatten();
     assert_eq!(
         image.map(|image| image.media_type),
-        Some("image/png".to_owned())
+        Some("image/webp".to_owned())
     );
     assert_eq!(
         asked(&fake),
