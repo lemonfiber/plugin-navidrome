@@ -2,6 +2,7 @@
 //! household is somebody `identity.source` names, and Navidrome speaks for none of them,
 //! so everything asked for one member is unsupported.
 
+use lemonfiber_adapter_kit::picture;
 use std::collections::HashMap;
 
 use async_trait::async_trait;
@@ -30,8 +31,6 @@ const NOW_PLAYING: &str = "getNowPlaying";
 const ALBUM_COVER: &str = "al-";
 
 const ARTWORK_ABSENT: u32 = 70;
-
-const PICTURE_PREFIX: &str = "image/";
 
 const SECONDS_IN_A_MINUTE: f64 = 60.0;
 
@@ -178,14 +177,10 @@ impl Navidrome {
                 .endpoint
                 .refused("Navidrome would not answer the cover"));
         }
-        let Some(media_type) = fetched
-            .header("content-type")
-            .filter(|kind| kind.starts_with(PICTURE_PREFIX))
-            .map(str::to_owned)
-        else {
-            return Ok(None);
-        };
-        Ok(fetched.bytes.map(|bytes| Image { media_type, bytes }))
+        let served = fetched.header("content-type").map(str::to_owned);
+        Ok(fetched
+            .bytes
+            .and_then(|bytes| picture::image(served.as_deref(), bytes)))
     }
 
     async fn albums(&self, most: u32) -> Result<Vec<Item>, Failure> {
