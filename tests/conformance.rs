@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use lemonfiber_contract::client::Witness;
-use lemonfiber_contract::conformance::{cases, Expect};
+use lemonfiber_contract::conformance::{filed, Expect};
 use lemonfiber_contract::{Contracted, Failure};
 use lemonfiber_ports::http::{Http, Request, Response, Unreachable};
 
@@ -109,6 +109,20 @@ fn upstream() -> toml::Table {
         .unwrap_or_default()
 }
 
+fn filing() -> Vec<String> {
+    upstream()
+        .get("media_types")
+        .and_then(toml::Value::as_array)
+        .map(|media| {
+            media
+                .iter()
+                .filter_map(toml::Value::as_str)
+                .map(str::to_owned)
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
 fn pinned() -> String {
     let upstream = upstream();
     format!("{}@{}", text(&upstream, "image"), text(&upstream, "digest"))
@@ -143,6 +157,7 @@ fn replayed(answer: &Answer) -> Response {
 #[tokio::test]
 async fn every_case_of_every_contract_spoken_is_recorded_and_read_as_the_core_reads_it() {
     let pinned = pinned();
+    let filing = filing();
     let spoken = spoken();
     assert_eq!(spoken, ["owner.claim@1", "media.serve@1"]);
     let mut faults = Vec::new();
@@ -151,7 +166,7 @@ async fn every_case_of_every_contract_spoken_is_recorded_and_read_as_the_core_re
         if !spoken.contains(&named) {
             continue;
         }
-        for case in cases(&capability) {
+        for case in filed(&capability, &filing) {
             let path = root()
                 .join("conformance")
                 .join(&named)

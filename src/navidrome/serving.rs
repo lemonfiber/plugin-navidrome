@@ -3,8 +3,8 @@
 use async_trait::async_trait;
 use lemonfiber_ports::media::Kind;
 use lemonfiber_ports::service::{
-    AppKeys, Applied, Dated, Declared, Declaring, Encrypting, Failure, Fronted, Library,
-    SeriesHeld, Upkeep,
+    AppKeys, Applied, Astray, Dated, Declared, Declaring, Encrypting, Failure, FiledAt, Fronted,
+    Furnished, Furnishing, Library, SeriesHeld, Upkeep,
 };
 
 use super::Navidrome;
@@ -24,6 +24,8 @@ const NO_RESTART: &str = "Navidrome cannot be asked to start again";
 const NO_GUARD: &str = "Navidrome serves no member through a guard of lemonfiber's";
 
 const NO_TLS: &str = "Navidrome serves no internal TLS port";
+
+const NO_LIBRARIES: &str = "Navidrome reads the one music folder its configuration names";
 
 const SCAN: &str = "startScan";
 
@@ -76,6 +78,10 @@ impl AppKeys for Navidrome {
     async fn revoke(&self, _key: &str) -> Result<(), Failure> {
         Err(Self::unsupported(NO_KEYS))
     }
+
+    async fn astray(&self, _app: &str) -> Result<Vec<Astray>, Failure> {
+        Err(Self::unsupported(NO_KEYS))
+    }
 }
 
 #[async_trait]
@@ -112,5 +118,12 @@ impl Declaring for Navidrome {
 impl Encrypting for Navidrome {
     async fn serve_tls(&self, _path: &str, _pin: &str) -> Result<Applied, Failure> {
         Err(Self::unsupported(NO_TLS))
+    }
+}
+
+#[async_trait]
+impl Furnishing for Navidrome {
+    async fn furnish(&self, _filed: &[FiledAt]) -> Result<Vec<Furnished>, Failure> {
+        Err(Self::unsupported(NO_LIBRARIES))
     }
 }

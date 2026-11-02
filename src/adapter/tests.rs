@@ -134,12 +134,17 @@ async fn what_navidrome_has_no_equivalent_for_and_whatever_names_a_member_is_ans
         ("dated", r#"{"app":"a"}"#),
         ("answers_to", r#"{"key":"k"}"#),
         ("revoke", r#"{"key":"k"}"#),
+        ("astray", r#"{"app":"a"}"#),
         ("known_proxies", "{}"),
         ("trust_only", r#"{"address":"10.0.0.1"}"#),
         ("allowed_origins", "{}"),
         ("allow_only", r#"{"origin":"https://example.org"}"#),
         ("restart", "{}"),
         ("declared", "{}"),
+        (
+            "furnish",
+            r#"{"filed":[{"media_type":"music","folder":"/music"}]}"#,
+        ),
     ] {
         let fake = Fake::silent();
         let (status, body) = answered_by(
