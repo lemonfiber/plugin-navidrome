@@ -24,6 +24,7 @@ memory_mib  = 100
 reaches     = "music metadata providers, and the background collection its sign-in page draws from"
 asks_for    = "Reads artist images, biographies and similar-artist lists for the music in your library — Deezer and ListenBrainz, neither of which needs an account of yours. Its anonymous usage report is the one thing it would send about this machine, and the compose entry turns that off rather than leaving it on."
 takes_data  = true
+media_types = ["music"]
 user_mode   = "uid"
 replaces    = "navidrome"
 

@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
-use lemonfiber_ports::service::{Encrypting as _, Failure, Library as _, Owner, Ownership as _};
+use lemonfiber_ports::service::{
+    Claim, Encrypting as _, Failure, Library as _, Owner, Ownership as _,
+};
 
 use super::owning::first_time;
 use super::{an_id, Navidrome};
@@ -385,7 +387,7 @@ async fn a_claim_makes_the_minted_administrator_while_nobody_holds_it_and_keeps_
         (Method::Get, "/api/album", Answer::reply(200, "[]")),
     ]);
     let navidrome = navidrome(&fake);
-    assert_eq!(navidrome.claim().await.ok(), Some(Owner::Ours));
+    assert_eq!(navidrome.claim().await.ok(), Some(Claim::Held(Owner::Ours)));
     assert!(navidrome
         .read::<Vec<()>>("/api/album", "albums")
         .await
@@ -419,7 +421,10 @@ async fn a_claim_whose_administrator_cannot_be_read_is_refused() {
 #[tokio::test]
 async fn a_claim_changes_nothing_somebody_already_holds() {
     let fake = signed_in_and(vec![(Method::Get, "/app/", Answer::reply(200, SET_UP))]);
-    assert_eq!(navidrome(&fake).claim().await.ok(), Some(Owner::Ours));
+    assert_eq!(
+        navidrome(&fake).claim().await.ok(),
+        Some(Claim::Held(Owner::Ours))
+    );
     assert!(!fake.asked_for("/auth/createAdmin"));
 }
 
@@ -448,7 +453,10 @@ async fn a_claim_another_first_run_beat_answers_who_holds_it_now() {
             )],
         ),
     ]);
-    assert_eq!(navidrome(&fake).claim().await.ok(), Some(Owner::Theirs));
+    assert_eq!(
+        navidrome(&fake).claim().await.ok(),
+        Some(Claim::Held(Owner::Theirs))
+    );
 }
 
 #[tokio::test]

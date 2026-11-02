@@ -3,7 +3,7 @@
 
 use async_trait::async_trait;
 use lemonfiber_ports::http::Method;
-use lemonfiber_ports::service::{Failure, Owner, Ownership};
+use lemonfiber_ports::service::{Claim, Failure, Owner, Ownership};
 use serde::Deserialize;
 
 use super::{Navidrome, Session};
@@ -59,10 +59,10 @@ impl Ownership for Navidrome {
         }
     }
 
-    async fn claim(&self) -> Result<Owner, Failure> {
+    async fn claim(&self) -> Result<Claim, Failure> {
         let held = self.owner().await?;
         if held != Owner::Open {
-            return Ok(held);
+            return Ok(Claim::Held(held));
         }
         let response = self
             .endpoint
@@ -79,11 +79,11 @@ impl Ownership for Navidrome {
                 "the administrator Navidrome made could not be read",
             )?;
             self.held(session)?;
-            return Ok(Owner::Ours);
+            return Ok(Claim::Held(Owner::Ours));
         }
         match self.owner().await? {
             Owner::Open => Err(self.endpoint.refusal(&response)),
-            held => Ok(held),
+            held => Ok(Claim::Held(held)),
         }
     }
 }
