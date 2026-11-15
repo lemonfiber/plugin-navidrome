@@ -20,6 +20,8 @@ const HEALTH: &str = "/ping";
 
 const LOGIN: &str = "/auth/login";
 
+const KEEPALIVE: &str = "/api/keepalive/keepalive";
+
 const SUBSONIC: &str = "/rest";
 
 const SUBSONIC_VERSION: &str = "1.16.1";
@@ -176,6 +178,21 @@ impl Navidrome {
             Some(session) => Ok(session),
             None => self.opened().await,
         }
+    }
+
+    async fn accepted_session(&self) -> Result<Session, Failure> {
+        let held = self.session.lock().ok().and_then(|held| held.clone());
+        if let Some(session) = held {
+            let response = self
+                .endpoint
+                .send(&self.request(Method::Get, KEEPALIVE, None, Some(&session.token)))
+                .await?;
+            if response.status != SESSION_REFUSED {
+                self.endpoint.expect_success(&response)?;
+                return Ok(session);
+            }
+        }
+        self.opened().await
     }
 
     async fn as_admin(&self, path: &str) -> Result<Response, Failure> {
