@@ -354,6 +354,99 @@ async fn it_is_theirs_where_the_minted_account_is_refused_or_administers_nothing
 }
 
 #[tokio::test]
+async fn asking_who_holds_it_again_signs_in_once_and_keeps_the_session() {
+    let fake = signed_in_and(vec![
+        (Method::Get, "/app/", Answer::reply(200, SET_UP)),
+        (
+            Method::Get,
+            "/api/keepalive/keepalive",
+            Answer::reply(200, r#"{"response":"ok", "id":"keepalive"}"#),
+        ),
+    ]);
+    let navidrome = navidrome(&fake);
+    for _ in 0..3 {
+        assert_eq!(navidrome.owner().await.ok(), Some(Owner::Ours));
+    }
+    assert_eq!(
+        asked(&fake),
+        [
+            (Method::Get, "/app/".to_owned()),
+            (Method::Post, "/auth/login".to_owned()),
+            (Method::Get, "/app/".to_owned()),
+            (Method::Get, "/api/keepalive/keepalive".to_owned()),
+            (Method::Get, "/app/".to_owned()),
+            (Method::Get, "/api/keepalive/keepalive".to_owned()),
+        ]
+    );
+    assert!(fake
+        .requests()
+        .iter()
+        .filter(|one| one.url.contains("/api/keepalive"))
+        .all(|one| one
+            .headers
+            .contains(&("X-ND-Authorization".to_owned(), format!("Bearer {TOKEN}")))));
+}
+
+#[tokio::test]
+async fn a_held_session_navidrome_refuses_is_opened_again_to_say_who_holds_it() {
+    let fake = Fake::by_route_in_turn(vec![
+        (
+            Method::Get,
+            "/app/",
+            vec![Answer::reply(200, SET_UP), Answer::reply(200, SET_UP)],
+        ),
+        (
+            Method::Post,
+            "/auth/login",
+            vec![
+                Answer::reply(200, SIGNED_IN),
+                Answer::reply(401, r#"{"error":"Invalid username or password"}"#),
+            ],
+        ),
+        (
+            Method::Get,
+            "/api/keepalive/keepalive",
+            vec![Answer::reply(401, "Unauthorized")],
+        ),
+    ]);
+    let navidrome = navidrome(&fake);
+    assert_eq!(navidrome.owner().await.ok(), Some(Owner::Ours));
+    assert_eq!(navidrome.owner().await.ok(), Some(Owner::Theirs));
+    assert_eq!(
+        asked(&fake),
+        [
+            (Method::Get, "/app/".to_owned()),
+            (Method::Post, "/auth/login".to_owned()),
+            (Method::Get, "/app/".to_owned()),
+            (Method::Get, "/api/keepalive/keepalive".to_owned()),
+            (Method::Post, "/auth/login".to_owned()),
+        ]
+    );
+}
+
+#[tokio::test]
+async fn a_held_session_navidrome_cannot_check_is_refused_without_signing_in_again() {
+    let fake = signed_in_and(vec![
+        (Method::Get, "/app/", Answer::reply(200, SET_UP)),
+        (
+            Method::Get,
+            "/api/keepalive/keepalive",
+            Answer::reply(500, ""),
+        ),
+    ]);
+    let navidrome = navidrome(&fake);
+    assert_eq!(navidrome.owner().await.ok(), Some(Owner::Ours));
+    assert!(refused_saying(navidrome.owner().await, "HTTP 500"));
+    assert_eq!(
+        asked(&fake)
+            .iter()
+            .filter(|(_, path)| path == "/auth/login")
+            .count(),
+        1
+    );
+}
+
+#[tokio::test]
 async fn an_owner_it_cannot_read_is_refused() {
     let unreadable = Fake::always(Answer::reply(200, "<html>"));
     assert!(refused_saying(

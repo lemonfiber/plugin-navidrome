@@ -52,7 +52,7 @@ impl Ownership for Navidrome {
         if self.unclaimed().await? {
             return Ok(Owner::Open);
         }
-        match self.opened().await {
+        match self.accepted_session().await {
             Ok(session) if session.is_admin => Ok(Owner::Ours),
             Ok(_) | Err(Failure::Unauthorised { .. }) => Ok(Owner::Theirs),
             Err(failure) => Err(failure),
