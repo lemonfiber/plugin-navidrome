@@ -126,7 +126,6 @@ async fn what_navidrome_has_no_equivalent_for_and_whatever_names_a_member_is_ans
         ("picture", r#"{"member":"m","id":"i","which":"poster"}"#),
         ("holdings", r#"{"member":"m","most":1}"#),
         ("playing", r#"{"member":"m"}"#),
-        ("has_item", r#"{"kind":"movies","term":"t"}"#),
         ("series_held", r#"{"most":1}"#),
         ("refresh", r#"{"id":"i"}"#),
         ("filed_as", r#"{"app":"a"}"#),
@@ -135,16 +134,29 @@ async fn what_navidrome_has_no_equivalent_for_and_whatever_names_a_member_is_ans
         ("answers_to", r#"{"key":"k"}"#),
         ("revoke", r#"{"key":"k"}"#),
         ("astray", r#"{"app":"a"}"#),
+        ("account", r#"{"app":"a"}"#),
+        ("listed_as", "{}"),
         ("known_proxies", "{}"),
         ("trust_only", r#"{"address":"10.0.0.1"}"#),
         ("allowed_origins", "{}"),
         ("allow_only", r#"{"origin":"https://example.org"}"#),
+        (
+            "allow_origins",
+            r#"{"origins":["https://example.org","https://console.example.org"]}"#,
+        ),
         ("restart", "{}"),
         ("declared", "{}"),
         (
             "furnish",
             r#"{"filed":[{"media_type":"music","folder":"/music"}]}"#,
         ),
+        (
+            "events",
+            r#"{"address":"https://lemonfiber:8443/events","pin":"p","key":"k","every":60}"#,
+        ),
+        ("channels", r#"{"member":"m"}"#),
+        ("tune", r#"{"member":"m","channel":"c"}"#),
+        ("untune", r#"{"closes_by":"c"}"#),
     ] {
         let fake = Fake::silent();
         let (status, body) = answered_by(
@@ -162,6 +174,21 @@ async fn what_navidrome_has_no_equivalent_for_and_whatever_names_a_member_is_ans
         );
         assert!(fake.requests().is_empty(), "{operation}");
     }
+}
+
+#[tokio::test]
+async fn who_claimed_it_is_unsupported_since_its_own_minted_administrator_did() {
+    let fake = Fake::silent();
+    let (_, body) = answered_by(
+        &fake,
+        "POST",
+        "/lemonfiber/owner.claim/v1/claimed_by",
+        Some(&a_key()),
+        "{}",
+    )
+    .await;
+    assert_eq!(kind_of(&body), Some(serde_json::json!("unsupported")));
+    assert!(fake.requests().is_empty());
 }
 
 #[tokio::test]

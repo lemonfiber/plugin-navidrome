@@ -22,6 +22,8 @@ const LOGIN: &str = "/auth/login";
 
 const KEEPALIVE: &str = "/api/keepalive/keepalive";
 
+const ALBUMS: &str = "/api/album";
+
 const SUBSONIC: &str = "/rest";
 
 const SUBSONIC_VERSION: &str = "1.16.1";
@@ -146,6 +148,7 @@ impl Navidrome {
             headers,
             body,
             pinned: None,
+            deadline: None,
         }
     }
 
