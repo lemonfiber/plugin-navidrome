@@ -17,8 +17,7 @@ pub const UPSTREAM: &str = "Navidrome";
 /// The Navidrome release this adapter's recordings were taken from.
 pub const RELEASE: &str = "0.64.2";
 
-/// The digest of the image that release's recordings were taken from.
-pub const DIGEST: &str = "sha256:38dc2727bfcfd5ede290f8ada114fc90368146f265ae4701ddddbcbe2a44ee52";
+include!(concat!(env!("OUT_DIR"), "/fronted.rs"));
 
 /// What this adapter says it is: the contracts it speaks and the release it supports.
 #[must_use]
