@@ -16,6 +16,9 @@ const CONFIGURED: &str = "__APP_CONFIG__ = ";
 
 const UNREAD: &str = "whether Navidrome has its first administrator could not be read";
 
+const CLAIMED_ITSELF: &str =
+    "Navidrome is claimed with the administrator lemonfiber minted for this plugin, which no outside service holds";
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Configured {
@@ -85,5 +88,9 @@ impl Ownership for Navidrome {
             Owner::Open => Err(self.endpoint.refusal(&response)),
             held => Ok(Claim::Held(held)),
         }
+    }
+
+    async fn claimed_by(&self) -> Result<Option<String>, Failure> {
+        Err(Self::unsupported(CLAIMED_ITSELF))
     }
 }

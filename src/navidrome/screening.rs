@@ -13,14 +13,12 @@ use lemonfiber_ports::service::{
 };
 use serde::Deserialize;
 
-use super::{an_id, Navidrome, ABSENT};
+use super::{an_id, Navidrome, ABSENT, ALBUMS};
 
 const NO_MEMBERS: &str =
     "Navidrome speaks for none of the household's accounts, so nothing is asked for one";
 
 const NO_DEVICES: &str = "Navidrome opens and ends no device's session for lemonfiber";
-
-const ALBUMS: &str = "/api/album";
 
 const USERS: &str = "/api/user";
 

@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
+use lemonfiber_ports::media::TitleKind;
 use lemonfiber_ports::service::{
     Claim, Encrypting as _, Failure, Library as _, Owner, Ownership as _,
 };
@@ -444,6 +445,49 @@ async fn a_held_session_navidrome_cannot_check_is_refused_without_signing_in_aga
             .count(),
         1
     );
+}
+
+#[tokio::test]
+async fn an_album_whose_name_holds_the_term_is_in_the_library() {
+    let fake = signed_in_and(vec![(
+        Method::Get,
+        "/api/album",
+        Answer::reply(200, r#"[{"id":"a1","name":"Kind of Blue"},{"id":"a2"}]"#),
+    )]);
+    let navidrome = navidrome(&fake);
+    assert_eq!(
+        navidrome.has_item(TitleKind::Music, "kind OF").await.ok(),
+        Some(true)
+    );
+    assert_eq!(
+        navidrome
+            .has_item(TitleKind::Music, "Giant Steps")
+            .await
+            .ok(),
+        Some(false)
+    );
+    assert_eq!(
+        url_of(&fake, "/api/album"),
+        Some(format!("{BASE}/api/album?name=kind+OF"))
+    );
+}
+
+#[tokio::test]
+async fn nothing_but_music_is_in_the_library_and_nothing_is_asked_for_it() {
+    let fake = Fake::silent();
+    for kind in [TitleKind::Tv, TitleKind::Movies, TitleKind::Books] {
+        assert_eq!(navidrome(&fake).has_item(kind, "t").await.ok(), Some(false));
+    }
+    assert!(fake.requests().is_empty());
+}
+
+#[tokio::test]
+async fn albums_it_cannot_read_leave_it_unable_to_say() {
+    let fake = signed_in_and(vec![(Method::Get, "/api/album", Answer::reply(200, "{"))]);
+    assert!(refused_saying(
+        navidrome(&fake).has_item(TitleKind::Music, "t").await,
+        "albums Navidrome holds could not be read"
+    ));
 }
 
 #[tokio::test]
